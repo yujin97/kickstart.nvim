@@ -473,7 +473,7 @@ mason_lspconfig.setup_handlers {
   ["eslint"] = function()
     require("lspconfig").eslint.setup(
       {
-        filestypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
+        filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
         settings = {
           format = { enable = true },
           lint = { enable = true },
@@ -481,6 +481,19 @@ mason_lspconfig.setup_handlers {
       }
     )
   end,
+  ["tsserver"] = function()
+    require('lspconfig')["tsserver"].setup {
+      capabilities = capabilities,
+      on_attach = function(client, bufnr)
+        if require("lspconfig").util.root_pattern(".flowconfig")(vim.fn.getcwd()) then
+          client.stop()
+          return
+        end
+        on_attach(client, bufnr)
+      end,
+      settings = servers["tsserver"],
+    }
+  end
 }
 
 -- [[ Configure nvim-cmp ]]
