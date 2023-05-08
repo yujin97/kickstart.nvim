@@ -8,3 +8,4 @@ end
 ColorMyPencils()
 
 vim.opt.relativenumber = true
+vim.api.nvim_exec('language en_US', true)
