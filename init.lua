@@ -485,6 +485,14 @@ mason_lspconfig.setup_handlers {
     require('lspconfig')["tsserver"].setup {
       capabilities = capabilities,
       on_attach = function(client, bufnr)
+        vim.api.nvim_buf_create_user_command(bufnr, 'NullFormat', function()
+          vim.lsp.buf.format({
+            bufnr = bufnr,
+            filter = function(format_client)
+              return format_client.name == "null-ls"
+            end
+          })
+        end, { desc = 'Format current buffer with null-ls' })
         if require("lspconfig").util.root_pattern(".flowconfig")(vim.fn.getcwd()) then
           client.stop()
           return
