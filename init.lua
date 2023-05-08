@@ -271,6 +271,12 @@ require('telescope').setup {
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
 
+local find_files = function()
+  require('telescope.builtin').find_files {
+    find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
+    previewer = false
+  }
+end
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
@@ -282,6 +288,7 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
+vim.keymap.set('n', '<leader>ff', find_files, { desc = '[F]ind [F]iles' })
 vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
@@ -416,6 +423,7 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
+  eslint = {},
   tsserver = {},
   lua_ls = {
     Lua = {
@@ -439,11 +447,10 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
-mason_lspconfig.setup_handlers {
+local handlers = {
   function(server_name)
     -- if server_name is 'rust_analyzer, do not set up
-    if server_name ~= "rust_analyzer"
-    then
+    if server_name ~= "rust_analyzer" then
       require('lspconfig')[server_name].setup {
         capabilities = capabilities,
         on_attach = on_attach,
@@ -451,7 +458,23 @@ mason_lspconfig.setup_handlers {
       }
     end
   end,
+  ["eslint"] = function()
+    require("lspconfig").eslint.setup(
+      {
+        filestypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
+        settings = {
+          format = { enable = true },
+          lint = { enable = true },
+        },
+      }
+    )
+  end,
+  ["tsserver"] = function()
+    require("lspconfig").tsserver.setup {}
+  end
 }
+
+mason_lspconfig.setup_handlers(handlers)
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
