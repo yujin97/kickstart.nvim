@@ -498,10 +498,6 @@ mason_lspconfig.setup_handlers {
             end
           })
         end, { desc = 'Format current buffer with null-ls' })
-        if require("lspconfig").util.root_pattern(".flowconfig")(vim.fn.getcwd()) then
-          client.stop()
-          return
-        end
         on_attach(client, bufnr)
       end,
       settings = servers["tsserver"],
